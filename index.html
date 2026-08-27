@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUL - First Person Fighting Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Start Screen -->
+        <div id="startScreen" class="screen active">
+            <div class="startMenu">
+                <h1>STUL</h1>
+                <p>First Person Fighting Game</p>
+                <button id="startBtn" class="btn">START GAME</button>
+                <button id="instructionsBtn" class="btn">INSTRUCTIONS</button>
+            </div>
+        </div>
+
+        <!-- Instructions Screen -->
+        <div id="instructionsScreen" class="screen">
+            <div class="instructionsMenu">
+                <h2>INSTRUCTIONS</h2>
+                <div class="instructions-content">
+                    <p><strong>Controls:</strong></p>
+                    <p>W/A/S/D - Move</p>
+                    <p>LEFT CLICK - Shoot</p>
+                    <p>RIGHT CLICK - Aim/Zoom</p>
+                    <p>1/2/3 - Switch Weapons</p>
+                    <p>G - Throw Grenade</p>
+                    <p>SPACE - Smoke Grenade</p>
+                    <p>E - Use Ability</p>
+                </div>
+                <p><strong>Objective:</strong> Defeat all bots to progress to the next level!</p>
+                <button id="backBtn" class="btn">BACK</button>
+            </div>
+        </div>
+
+        <!-- Level Select Screen -->
+        <div id="levelSelectScreen" class="screen">
+            <div class="levelSelectMenu">
+                <h2>SELECT MAP</h2>
+                <div class="mapGrid">
+                    <div class="mapCard" data-map="arena">
+                        <h3>Arena</h3>
+                        <p>Small enclosed space</p>
+                    </div>
+                    <div class="mapCard" data-map="warehouse">
+                        <h3>Warehouse</h3>
+                        <p>Large industrial area</p>
+                    </div>
+                    <div class="mapCard" data-map="street">
+                        <h3>Street</h3>
+                        <p>Urban battlefield</p>
+                    </div>
+                    <div class="mapCard" data-map="desert">
+                        <h3>Desert</h3>
+                        <p>Open field</p>
+                    </div>
+                </div>
+                <button id="levelSelectBackBtn" class="btn">BACK</button>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shopScreen" class="screen">
+            <div class="shopMenu">
+                <h2>ARMORY</h2>
+                <div class="money">Money: $<span id="moneyDisplay">0</span></div>
+                
+                <div class="shopSection">
+                    <h3>WEAPONS</h3>
+                    <div class="shopGrid">
+                        <div class="shopItem" data-type="weapon" data-id="pistol">
+                            <h4>Pistol</h4>
+                            <p>Damage: 10</p>
+                            <p>Fire Rate: Fast</p>
+                            <p>$100</p>
+                            <button class="buyBtn">Buy</button>
+                        </div>
+                        <div class="shopItem" data-type="weapon" data-id="rifle">
+                            <h4>Rifle</h4>
+                            <p>Damage: 20</p>
+                            <p>Fire Rate: Medium</p>
+                            <p>$250</p>
+                            <button class="buyBtn">Buy</button>
+                        </div>
+                        <div class="shopItem" data-type="weapon" data-id="shotgun">
+                            <h4>Shotgun</h4>
+                            <p>Damage: 40</p>
+                            <p>Fire Rate: Slow</p>
+                            <p>$500</p>
+                            <button class="buyBtn">Buy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shopSection">
+                    <h3>ABILITIES</h3>
+                    <div class="shopGrid">
+                        <div class="shopItem" data-type="ability" data-id="grenade">
+                            <h4>Grenade</h4>
+                            <p>Explosive damage</p>
+                            <p>$150</p>
+                            <button class="buyBtn">Buy</button>
+                        </div>
+                        <div class="shopItem" data-type="ability" data-id="smokeGrenade">
+                            <h4>Smoke Grenade</h4>
+                            <p>Escape tool</p>
+                            <p>$100</p>
+                            <button class="buyBtn">Buy</button>
+                        </div>
+                        <div class="shopItem" data-type="ability" data-id="heal">
+                            <h4>Medkit</h4>
+                            <p>Restore 50 HP</p>
+                            <p>$200</p>
+                            <button class="buyBtn">Buy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="shopStartBtn" class="btn">START GAME</button>
+                <button id="shopBackBtn" class="btn">BACK</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <canvas id="gameCanvas"></canvas>
+            <div class="hud">
+                <div class="hudLeft">
+                    <div class="playerHealth">
+                        <p>HP: <span id="playerHpDisplay">100</span>/100</span></p>
+                        <div class="healthBar">
+                            <div class="healthBarFill" id="healthBarFill"></div>
+                        </div>
+                    </div>
+                    <div class="ammo">
+                        <p>Ammo: <span id="ammoDisplay">30</span></p>
+                    </div>
+                </div>
+                <div class="hudCenter">
+                    <div class="crosshair"></div>
+                </div>
+                <div class="hudRight">
+                    <div class="levelInfo">
+                        <p>Level: <span id="levelDisplay">1</span></p>
+                    </div>
+                    <div class="botsRemaining">
+                        <p>Bots: <span id="botsDisplay">1</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen">
+            <div class="gameOverMenu">
+                <h2 id="gameOverTitle">GAME OVER</h2>
+                <p id="gameOverMessage"></p>
+                <div class="gameOverStats">
+                    <p>Kills: <span id="killsDisplay">0</span></p>
+                    <p>Reward: $<span id="rewardDisplay">0</span></p>
+                </div>
+                <button id="gameOverContinueBtn" class="btn">CONTINUE</button>
+                <button id="gameOverMenuBtn" class="btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
