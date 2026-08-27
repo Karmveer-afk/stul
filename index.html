@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STUL - FPS Game</title>
+    <title>STUL - FPS (Rivals Style)</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Main Game Container -->
     <div id="gameContainer">
-        <!-- Main Menu Screen -->
+        <!-- Main Menu -->
         <div id="mainMenu" class="screen active">
             <div class="menuContent">
                 <h1>STUL</h1>
@@ -19,56 +18,55 @@
             </div>
         </div>
 
-        <!-- Instructions Screen -->
+        <!-- Instructions -->
         <div id="instructionsScreen" class="screen">
             <div class="menuContent">
                 <h1>INSTRUCTIONS</h1>
                 <div class="instructionsText">
-                    <p><strong>Controls:</strong></p>
-                    <p>W - Forward | S - Backward</p>
-                    <p>A - Left | D - Right</p>
+                    <p><strong>CONTROLS:</strong></p>
+                    <p>W - Forward | S - Backward | A - Strafe Left | D - Strafe Right</p>
                     <p>SPACE - Jump</p>
                     <p>LEFT CLICK - Shoot</p>
-                    <p>RIGHT CLICK - Aim</p>
-                    <p>1/2/3 - Switch Weapon</p>
+                    <p>RIGHT CLICK - Aim/Zoom</p>
+                    <p>SCROLL - Switch Weapon | 1/2/3/4 - Quick Switch</p>
                     <p>G - Throw Grenade</p>
                     <p>R - Reload</p>
-                    <p>TAB - Store</p>
-                    <p><strong>Objective:</strong> Kill bots to earn money and buy weapons!</p>
+                    <p>TAB - Store (During Game)</p>
+                    <p style="margin-top: 20px;"><strong>Kill bots to earn money and upgrade!</strong></p>
                 </div>
                 <button id="backBtn" class="menuBtn">BACK</button>
             </div>
         </div>
 
-        <!-- Level Select Screen -->
+        <!-- Level Select -->
         <div id="levelSelectScreen" class="screen">
             <div class="menuContent">
                 <h1>SELECT LEVEL</h1>
                 <div class="levelGrid">
                     <div class="levelCard" data-level="1">
                         <h3>Level 1</h3>
-                        <p>1 Easy Bot</p>
-                        <p>Beginner</p>
+                        <p>1 Bot</p>
+                        <p class="difficulty">Easy</p>
                     </div>
                     <div class="levelCard" data-level="2">
                         <h3>Level 2</h3>
-                        <p>2 Medium Bots</p>
-                        <p>Easy</p>
+                        <p>2 Bots</p>
+                        <p class="difficulty">Easy</p>
                     </div>
                     <div class="levelCard" data-level="3">
                         <h3>Level 3</h3>
-                        <p>2 Hard Bots</p>
-                        <p>Medium</p>
+                        <p>2 Bots</p>
+                        <p class="difficulty">Medium</p>
                     </div>
                     <div class="levelCard" data-level="4">
                         <h3>Level 4</h3>
-                        <p>3 Hard Bots</p>
-                        <p>Hard</p>
+                        <p>3 Bots</p>
+                        <p class="difficulty">Hard</p>
                     </div>
                     <div class="levelCard" data-level="5">
                         <h3>Level 5</h3>
                         <p>1 BOSS</p>
-                        <p>Extreme</p>
+                        <p class="difficulty">EXTREME</p>
                     </div>
                 </div>
                 <button id="levelBackBtn" class="menuBtn">BACK</button>
@@ -80,116 +78,144 @@
             <canvas id="gameCanvas"></canvas>
             
             <!-- HUD -->
-            <div class="hud">
-                <!-- Top Right: Money -->
-                <div class="hudTopRight">
-                    <div class="money">
-                        <span>$</span><span id="moneyDisplay">0</span>
-                    </div>
-                </div>
-
-                <!-- Top Left: Health & Ammo -->
+            <div class="gameHUD">
+                <!-- Top Left: Health -->
                 <div class="hudTopLeft">
-                    <div class="health">
-                        <p>HP: <span id="healthDisplay">100</span>/100</p>
+                    <div class="healthDisplay">
+                        <span class="label">HP</span>
+                        <span class="value" id="hudHealth">100</span>
                         <div class="healthBar">
-                            <div class="healthBarFill"></div>
+                            <div class="healthBarFill" id="hudHealthBar"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bottom Center: Crosshair -->
-                <div class="crosshairContainer">
-                    <div class="crosshair"></div>
-                </div>
-
-                <!-- Bottom Left: Weapon Info -->
-                <div class="hudBottomLeft">
-                    <div class="weaponInfo">
-                        <p id="weaponName">Pistol</p>
-                        <p>Ammo: <span id="ammoDisplay">30</span>/<span id="maxAmmoDisplay">30</span></p>
+                <!-- Top Right: Money -->
+                <div class="hudTopRight">
+                    <div class="moneyDisplay">
+                        <span class="dollarSign">$</span>
+                        <span class="value" id="hudMoney">0</span>
                     </div>
                 </div>
 
-                <!-- Bottom Right: Controls -->
+                <!-- Center: Crosshair -->
+                <div class="crosshair"></div>
+
+                <!-- Bottom Left: Ammo -->
+                <div class="hudBottomLeft">
+                    <div class="ammoDisplay">
+                        <span id="hudCurrentAmmo">30</span>
+                        <span class="slash">/</span>
+                        <span id="hudMaxAmmo">30</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Right: Weapon & Info -->
                 <div class="hudBottomRight">
-                    <p>TAB - Store | G - Grenade | R - Reload</p>
+                    <div class="weaponDisplay">
+                        <p id="hudWeapon">Pistol</p>
+                        <p class="info">TAB - Store | G - Grenade | R - Reload</p>
+                    </div>
+                </div>
+
+                <!-- Weapon Model (Bottom Right Corner) -->
+                <div class="weaponModel">
+                    <canvas id="weaponCanvas"></canvas>
                 </div>
             </div>
 
             <!-- Store Modal -->
             <div id="storeModal" class="modal">
-                <div class="storeContent">
+                <div class="storeContainer">
                     <h2>STORE</h2>
-                    <div class="storeMoney">Money: $<span id="storeMoney">0</span></div>
-                    
-                    <div class="storeSection">
-                        <h3>WEAPONS</h3>
-                        <div class="storeGrid">
-                            <div class="storeItem" data-type="weapon" data-id="pistol">
-                                <h4>Pistol</h4>
-                                <p>Damage: 10</p>
-                                <p>Fire Rate: Fast</p>
-                                <p class="price">$100</p>
-                                <button class="buyBtn">Buy</button>
+                    <div class="storeHeader">
+                        <div class="storeMoney">
+                            <span class="label">Money:</span>
+                            <span class="value">$<span id="storeMoney">0</span></span>
+                        </div>
+                        <button id="closeStoreBtn" class="closeBtn">CLOSE (TAB)</button>
+                    </div>
+
+                    <div class="storeContent">
+                        <div class="storeSection">
+                            <h3>WEAPONS</h3>
+                            <div class="storeGrid">
+                                <div class="storeItem" data-type="weapon" data-id="pistol">
+                                    <h4>Pistol</h4>
+                                    <p class="damage">DMG: 10</p>
+                                    <p class="firerate">FIRE: Fast</p>
+                                    <p class="cost">$0</p>
+                                    <button class="buyBtn">OWNED</button>
+                                </div>
+                                <div class="storeItem" data-type="weapon" data-id="rifle">
+                                    <h4>Rifle</h4>
+                                    <p class="damage">DMG: 25</p>
+                                    <p class="firerate">FIRE: Medium</p>
+                                    <p class="cost">$300</p>
+                                    <button class="buyBtn">BUY</button>
+                                </div>
+                                <div class="storeItem" data-type="weapon" data-id="shotgun">
+                                    <h4>Shotgun</h4>
+                                    <p class="damage">DMG: 50</p>
+                                    <p class="firerate">FIRE: Slow</p>
+                                    <p class="cost">$500</p>
+                                    <button class="buyBtn">BUY</button>
+                                </div>
+                                <div class="storeItem" data-type="weapon" data-id="sniper">
+                                    <h4>Sniper</h4>
+                                    <p class="damage">DMG: 100</p>
+                                    <p class="firerate">FIRE: V.Slow</p>
+                                    <p class="cost">$1000</p>
+                                    <button class="buyBtn">BUY</button>
+                                </div>
                             </div>
-                            <div class="storeItem" data-type="weapon" data-id="rifle">
-                                <h4>Rifle</h4>
-                                <p>Damage: 25</p>
-                                <p>Fire Rate: Medium</p>
-                                <p class="price">$300</p>
-                                <button class="buyBtn">Buy</button>
-                            </div>
-                            <div class="storeItem" data-type="weapon" data-id="shotgun">
-                                <h4>Shotgun</h4>
-                                <p>Damage: 50</p>
-                                <p>Fire Rate: Slow</p>
-                                <p class="price">$500</p>
-                                <button class="buyBtn">Buy</button>
-                            </div>
-                            <div class="storeItem" data-type="weapon" data-id="sniper">
-                                <h4>Sniper</h4>
-                                <p>Damage: 100</p>
-                                <p>Fire Rate: Very Slow</p>
-                                <p class="price">$1000</p>
-                                <button class="buyBtn">Buy</button>
+                        </div>
+
+                        <div class="storeSection">
+                            <h3>GRENADES & ABILITIES</h3>
+                            <div class="storeGrid">
+                                <div class="storeItem" data-type="grenade" data-id="grenade">
+                                    <h4>Grenades</h4>
+                                    <p class="damage">DMG: 75</p>
+                                    <p class="info">Explosive (G to throw)</p>
+                                    <p class="cost">$150</p>
+                                    <button class="buyBtn">BUY (1)</button>
+                                </div>
+                                <div class="storeItem" data-type="ability" data-id="health">
+                                    <h4>Health Pack</h4>
+                                    <p class="damage">HEAL: 50</p>
+                                    <p class="info">Restore HP</p>
+                                    <p class="cost">$200</p>
+                                    <button class="buyBtn">BUY (1)</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="storeSection">
-                        <h3>ABILITIES</h3>
-                        <div class="storeGrid">
-                            <div class="storeItem" data-type="ability" data-id="grenade">
-                                <h4>Grenades</h4>
-                                <p>Explosive</p>
-                                <p class="price">$150</p>
-                                <button class="buyBtn">Buy (1)</button>
-                            </div>
-                            <div class="storeItem" data-type="ability" data-id="health">
-                                <h4>Health Pack</h4>
-                                <p>+50 HP</p>
-                                <p class="price">$200</p>
-                                <button class="buyBtn">Buy (1)</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="closeStoreBtn" class="menuBtn">CLOSE (TAB)</button>
                 </div>
             </div>
 
             <!-- Game Over Modal -->
             <div id="gameOverModal" class="modal">
-                <div class="gameOverContent">
-                    <h2 id="gameOverTitle">GAME OVER</h2>
+                <div class="gameOverContainer">
+                    <h2 id="gameOverTitle">LEVEL COMPLETE!</h2>
                     <div class="gameOverStats">
-                        <p>Kills: <span id="killsCount">0</span></p>
-                        <p>Money Earned: $<span id="moneyEarned">0</span></p>
-                        <p>Total Money: $<span id="totalMoney">0</span></p>
+                        <div class="stat">
+                            <span class="label">Kills:</span>
+                            <span class="value" id="statKills">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Earned:</span>
+                            <span class="value">$<span id="statEarned">0</span></span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Total:</span>
+                            <span class="value">$<span id="statTotal">0</span></span>
+                        </div>
                     </div>
-                    <button id="nextLevelBtn" class="menuBtn">NEXT LEVEL</button>
-                    <button id="mainMenuBtn" class="menuBtn">MAIN MENU</button>
+                    <div class="gameOverButtons">
+                        <button id="nextLevelBtn" class="menuBtn">NEXT LEVEL</button>
+                        <button id="mainMenuBtn" class="menuBtn">MAIN MENU</button>
+                    </div>
                 </div>
             </div>
         </div>
