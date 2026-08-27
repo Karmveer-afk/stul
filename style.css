@@ -24,42 +24,46 @@ body {
     display: none;
     top: 0;
     left: 0;
+    z-index: 1;
 }
 
 .screen.active {
-    display: flex;
+    display: flex !important;
     justify-content: center;
     align-items: center;
+    z-index: 10;
 }
 
-/* Start Screen */
-.startMenu, .levelSelectMenu, .shopMenu, .instructionsMenu, .gameOverMenu {
-    background: rgba(0, 0, 0, 0.9);
-    border: 2px solid #00ff00;
-    padding: 40px;
-    border-radius: 10px;
+/* Menu Styles */
+.menuContent {
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid #00ff00;
+    padding: 50px;
+    border-radius: 15px;
     text-align: center;
     color: #00ff00;
-    max-width: 800px;
+    max-width: 900px;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
 }
 
-.startMenu h1 {
+.menuContent h1 {
     font-size: 60px;
     margin-bottom: 10px;
-    text-shadow: 0 0 10px #00ff00;
+    text-shadow: 0 0 15px #00ff00;
+    letter-spacing: 3px;
 }
 
-.startMenu p {
+.menuContent > p {
     font-size: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     color: #888;
 }
 
-.btn {
+.menuBtn {
     background: #00ff00;
     color: #000;
     border: none;
-    padding: 15px 30px;
+    padding: 15px 40px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -68,159 +72,83 @@ body {
     transition: all 0.3s;
 }
 
-.btn:hover {
+.menuBtn:hover {
     background: #00cc00;
     transform: scale(1.05);
     box-shadow: 0 0 20px #00ff00;
 }
 
-.btn:active {
+.menuBtn:active {
     transform: scale(0.95);
 }
 
-/* Instructions Screen */
-.instructionsMenu {
-    max-width: 600px;
-}
-
-.instructionsMenu h2 {
-    font-size: 40px;
-    margin-bottom: 20px;
-}
-
-.instructions-content {
+/* Instructions */
+.instructionsText {
     text-align: left;
-    margin: 20px 0;
-    font-size: 14px;
+    margin: 30px 0;
+    font-size: 16px;
+    line-height: 1.8;
 }
 
-.instructions-content p {
-    margin: 8px 0;
+.instructionsText p {
+    margin: 10px 0;
 }
 
 /* Level Select */
-.levelSelectMenu {
-    max-width: 900px;
-}
-
-.levelSelectMenu h2 {
-    font-size: 40px;
-    margin-bottom: 30px;
-}
-
-.mapGrid {
+.levelGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     margin: 30px 0;
 }
 
-.mapCard {
+.levelCard {
     background: rgba(0, 100, 0, 0.3);
     border: 2px solid #00ff00;
-    padding: 20px;
-    border-radius: 5px;
+    padding: 25px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
 }
 
-.mapCard:hover {
+.levelCard:hover {
     background: rgba(0, 150, 0, 0.5);
-    box-shadow: 0 0 15px #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+    transform: translateY(-5px);
 }
 
-.mapCard h3 {
+.levelCard h3 {
     font-size: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
-.mapCard p {
-    font-size: 12px;
+.levelCard p {
+    font-size: 13px;
     color: #aaa;
-}
-
-/* Shop Screen */
-.shopMenu {
-    max-width: 1000px;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.shopMenu h2 {
-    font-size: 40px;
-    margin-bottom: 20px;
-}
-
-.money {
-    font-size: 24px;
-    margin-bottom: 30px;
-    color: #ffff00;
-    text-shadow: 0 0 10px #ffff00;
-}
-
-.shopSection h3 {
-    font-size: 24px;
-    margin: 20px 0 15px 0;
-    text-align: left;
-}
-
-.shopGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.shopItem {
-    background: rgba(0, 50, 0, 0.5);
-    border: 2px solid #00ff00;
-    padding: 15px;
-    border-radius: 5px;
-    text-align: center;
-}
-
-.shopItem h4 {
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.shopItem p {
-    font-size: 12px;
-    margin: 5px 0;
-    color: #aaa;
-}
-
-.buyBtn {
-    background: #00ff00;
-    color: #000;
-    border: none;
-    padding: 8px 15px;
-    font-size: 12px;
-    cursor: pointer;
-    margin-top: 10px;
-    border-radius: 3px;
-    font-weight: bold;
-}
-
-.buyBtn:hover {
-    background: #00cc00;
+    margin: 8px 0;
 }
 
 /* Game Screen */
 #gameScreen {
     display: none !important;
+    position: relative;
 }
 
 #gameScreen.active {
     display: block !important;
+    z-index: 5;
 }
 
 #gameCanvas {
     width: 100%;
     height: 100%;
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
+/* HUD */
 .hud {
     position: absolute;
     top: 0;
@@ -228,93 +156,263 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 20px;
+    z-index: 2;
 }
 
-.hudLeft, .hudRight {
+.hudTopRight {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.hudTopLeft {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.hudBottomLeft {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+}
+
+.hudBottomRight {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.money {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #ffff00;
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 0 0 10px #ffff00;
+    min-width: 150px;
+    text-align: center;
+}
+
+.health {
     background: rgba(0, 0, 0, 0.7);
     border: 2px solid #00ff00;
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 8px;
     color: #00ff00;
     font-size: 14px;
 }
 
-.playerHealth, .ammo, .levelInfo, .botsRemaining {
-    margin: 10px 0;
+.health p {
+    margin-bottom: 8px;
 }
 
 .healthBar {
-    width: 150px;
+    width: 180px;
     height: 20px;
     background: #000;
     border: 2px solid #00ff00;
-    margin-top: 5px;
     border-radius: 3px;
     overflow: hidden;
 }
 
 .healthBarFill {
     height: 100%;
-    background: #00ff00;
+    background: linear-gradient(90deg, #00ff00, #00cc00);
     width: 100%;
     transition: width 0.1s;
 }
 
-.hudCenter {
+.weaponInfo {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #00ff00;
+    padding: 15px;
+    border-radius: 8px;
+    color: #00ff00;
+    font-size: 14px;
+    text-align: left;
+}
+
+.weaponInfo p {
+    margin: 5px 0;
+}
+
+.hudBottomRight {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #00ff00;
+    padding: 15px;
+    border-radius: 8px;
+    color: #00ff00;
+    font-size: 12px;
+    text-align: right;
+}
+
+.hudBottomRight p {
+    margin: 5px 0;
+}
+
+/* Crosshair */
+.crosshairContainer {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 3;
 }
 
 .crosshair {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border: 2px solid #00ff00;
     border-radius: 50%;
     position: relative;
 }
 
-.crosshair::before,
-.crosshair::after {
+.crosshair::before {
     content: '';
     position: absolute;
-    background: #00ff00;
-}
-
-.crosshair::before {
-    width: 15px;
+    width: 20px;
     height: 2px;
+    background: #00ff00;
     top: 50%;
-    left: -15px;
+    left: -22px;
     transform: translateY(-50%);
 }
 
 .crosshair::after {
+    content: '';
+    position: absolute;
     width: 2px;
-    height: 15px;
+    height: 20px;
+    background: #00ff00;
     left: 50%;
-    top: -15px;
+    top: -22px;
     transform: translateX(-50%);
 }
 
-/* Game Over Screen */
-.gameOverMenu {
-    max-width: 500px;
+/* Store Modal */
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    pointer-events: auto;
 }
 
-.gameOverMenu h2 {
-    font-size: 50px;
+.modal.active {
+    display: flex;
+}
+
+.storeContent, .gameOverContent {
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid #00ff00;
+    padding: 40px;
+    border-radius: 15px;
+    color: #00ff00;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+}
+
+.storeContent h2, .gameOverContent h2 {
+    font-size: 40px;
     margin-bottom: 20px;
+    text-align: center;
 }
 
-.gameOverMenu p {
+.storeMoney {
+    text-align: center;
     font-size: 20px;
-    margin: 15px 0;
+    color: #ffff00;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #ffff00;
+}
+
+.storeSection {
+    margin-bottom: 30px;
+}
+
+.storeSection h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+.storeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.storeItem {
+    background: rgba(0, 50, 0, 0.5);
+    border: 2px solid #00ff00;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.storeItem:hover {
+    background: rgba(0, 100, 0, 0.7);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+}
+
+.storeItem h4 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.storeItem p {
+    font-size: 12px;
+    margin: 5px 0;
+    color: #aaa;
+}
+
+.storeItem .price {
+    color: #ffff00;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.buyBtn {
+    background: #00ff00;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.buyBtn:hover {
+    background: #00cc00;
+    transform: scale(1.05);
+}
+
+.buyBtn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Game Over Modal */
+.gameOverContent {
+    text-align: center;
+    max-width: 500px;
 }
 
 .gameOverStats {
@@ -322,7 +420,7 @@ body {
     border: 2px solid #00ff00;
     padding: 20px;
     margin: 20px 0;
-    border-radius: 5px;
+    border-radius: 8px;
 }
 
 .gameOverStats p {
@@ -331,35 +429,39 @@ body {
 }
 
 /* Scrollbar styling */
-.shopMenu::-webkit-scrollbar {
+.storeContent::-webkit-scrollbar {
     width: 10px;
 }
 
-.shopMenu::-webkit-scrollbar-track {
+.storeContent::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.shopMenu::-webkit-scrollbar-thumb {
+.storeContent::-webkit-scrollbar-thumb {
     background: #00ff00;
     border-radius: 5px;
 }
 
-.shopMenu::-webkit-scrollbar-thumb:hover {
+.storeContent::-webkit-scrollbar-thumb:hover {
     background: #00cc00;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-    .mapGrid, .shopGrid {
+    .levelGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .storeGrid {
         grid-template-columns: 1fr;
     }
     
-    .startMenu h1 {
-        font-size: 40px;
+    .menuContent {
+        padding: 30px;
+        max-width: 90vw;
     }
     
-    .btn {
-        padding: 12px 20px;
-        font-size: 14px;
+    .menuContent h1 {
+        font-size: 40px;
     }
 }
