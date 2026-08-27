@@ -1,9 +1,41 @@
-// Weapon Configs
+// ===== WEAPON CONFIGURATION =====
 const WEAPONS = {
-    pistol: { damage: 10, fireRate: 100, maxAmmo: 30, cost: 0, owned: true },
-    rifle: { damage: 25, fireRate: 200, maxAmmo: 60, cost: 300, owned: false },
-    shotgun: { damage: 50, fireRate: 400, maxAmmo: 20, cost: 500, owned: false },
-    sniper: { damage: 100, fireRate: 800, maxAmmo: 10, cost: 1000, owned: false }
+    pistol: { 
+        name: 'Pistol', 
+        damage: 10, 
+        fireRate: 100, 
+        maxAmmo: 30, 
+        cost: 0, 
+        owned: true,
+        color: '#FFD700'
+    },
+    rifle: { 
+        name: 'Rifle', 
+        damage: 25, 
+        fireRate: 150, 
+        maxAmmo: 60, 
+        cost: 300, 
+        owned: false,
+        color: '#FF6347'
+    },
+    shotgun: { 
+        name: 'Shotgun', 
+        damage: 50, 
+        fireRate: 400, 
+        maxAmmo: 20, 
+        cost: 500, 
+        owned: false,
+        color: '#FF4500'
+    },
+    sniper: { 
+        name: 'Sniper', 
+        damage: 100, 
+        fireRate: 800, 
+        maxAmmo: 10, 
+        cost: 1000, 
+        owned: false,
+        color: '#DC143C'
+    }
 };
 
 const ABILITIES = {
@@ -12,14 +44,14 @@ const ABILITIES = {
 };
 
 const LEVELS = {
-    1: { botCount: 1, botHealth: 100, botDamage: 5, botSpeed: 2, isBoss: false, reward: 500 },
-    2: { botCount: 2, botHealth: 120, botDamage: 7, botSpeed: 2.5, isBoss: false, reward: 1000 },
-    3: { botCount: 2, botHealth: 140, botDamage: 9, botSpeed: 3, isBoss: false, reward: 1500 },
-    4: { botCount: 3, botHealth: 160, botDamage: 11, botSpeed: 3.5, isBoss: false, reward: 2000 },
+    1: { botCount: 1, botHealth: 100, botDamage: 5, botSpeed: 2.5, isBoss: false, reward: 500 },
+    2: { botCount: 2, botHealth: 120, botDamage: 7, botSpeed: 3, isBoss: false, reward: 1000 },
+    3: { botCount: 2, botHealth: 140, botDamage: 9, botSpeed: 3.5, isBoss: false, reward: 1500 },
+    4: { botCount: 3, botHealth: 160, botDamage: 11, botSpeed: 4, isBoss: false, reward: 2000 },
     5: { botCount: 1, botHealth: 300, botDamage: 20, botSpeed: 4.5, isBoss: true, reward: 5000 }
 };
 
-// Game State
+// ===== GAME STATE =====
 let gameState = {
     money: 0,
     level: 1,
@@ -27,11 +59,11 @@ let gameState = {
     selectedWeapon: 'pistol',
     ammo: 30,
     maxAmmo: 30,
-    inventory: { pistol: { owned: true } },
+    health: 100,
     game: null
 };
 
-// Screen Management
+// ===== UI MANAGEMENT =====
 function showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(name).classList.add('active');
@@ -44,6 +76,7 @@ document.getElementById('playBtn').addEventListener('click', () => {
     gameState.level = 1;
     gameState.selectedWeapon = 'pistol';
     gameState.ammo = 30;
+    gameState.health = 100;
     showScreen('levelSelectScreen');
 });
 
@@ -60,7 +93,7 @@ document.querySelectorAll('.levelCard').forEach(card => {
     card.addEventListener('click', function() {
         gameState.level = parseInt(this.dataset.level);
         showScreen('gameScreen');
-        startGame();
+        setTimeout(() => startGame(), 100);
     });
 });
 
@@ -68,17 +101,14 @@ document.getElementById('levelBackBtn').addEventListener('click', () => {
     showScreen('mainMenu');
 });
 
-// Store Modal
+// Store
 const storeModal = document.getElementById('storeModal');
 const gameOverModal = document.getElementById('gameOverModal');
 
-// TAB key to toggle store
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
+    if (e.key === 'Tab' && gameState.game && gameState.game.running) {
         e.preventDefault();
-        if (gameState.game && gameState.game.running) {
-            storeModal.classList.toggle('active');
-        }
+        storeModal.classList.toggle('active');
     }
 });
 
@@ -86,9 +116,9 @@ document.getElementById('closeStoreBtn').addEventListener('click', () => {
     storeModal.classList.remove('active');
 });
 
-// Store Item Purchase
-document.querySelectorAll('.storeItem').forEach(item => {
-    item.querySelector('.buyBtn').addEventListener('click', function() {
+document.querySelectorAll('.buyBtn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const item = this.closest('.storeItem');
         const type = item.dataset.type;
         const id = item.dataset.id;
         
@@ -101,11 +131,18 @@ document.querySelectorAll('.storeItem').forEach(item => {
                 this.disabled = true;
                 updateStoreDisplay();
             }
-        } else if (type === 'ability') {
-            const cost = ABILITIES[id].cost;
+        } else if (type === 'grenade') {
+            const cost = ABILITIES.grenade.cost;
             if (gameState.money >= cost) {
                 gameState.money -= cost;
-                ABILITIES[id].quantity++;
+                ABILITIES.grenade.quantity++;
+                updateStoreDisplay();
+            }
+        } else if (type === 'ability') {
+            const cost = ABILITIES.health.cost;
+            if (gameState.money >= cost) {
+                gameState.money -= cost;
+                ABILITIES.health.quantity++;
                 updateStoreDisplay();
             }
         }
@@ -123,9 +160,10 @@ function updateStoreDisplay() {
         if (type === 'weapon' && WEAPONS[id].owned) {
             btn.textContent = 'OWNED';
             btn.disabled = true;
+        } else if (type === 'grenade') {
+            btn.textContent = `BUY (${ABILITIES.grenade.quantity})`;
         } else if (type === 'ability') {
-            const qty = ABILITIES[id].quantity;
-            btn.textContent = `Buy (${qty})`;
+            btn.textContent = `BUY (${ABILITIES.health.quantity})`;
         }
     });
 }
@@ -134,15 +172,15 @@ document.getElementById('nextLevelBtn').addEventListener('click', () => {
     gameState.level++;
     if (gameState.level > 5) gameState.level = 5;
     showScreen('gameScreen');
-    startGame();
+    setTimeout(() => startGame(), 100);
 });
 
 document.getElementById('mainMenuBtn').addEventListener('click', () => {
     showScreen('mainMenu');
 });
 
-// Game Engine
-class FPSGame {
+// ===== GAME ENGINE =====
+class RivalsGame {
     constructor(level) {
         this.level = level;
         this.config = LEVELS[level];
@@ -151,30 +189,40 @@ class FPSGame {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         
+        // Player - First Person
         this.player = {
-            x: this.canvas.width / 2,
-            y: this.canvas.height / 2,
+            x: 400,
+            y: 300,
             vx: 0,
             vy: 0,
             health: 100,
             maxHealth: 100,
-            speed: 6,
-            jumpPower: 15,
-            isGrounded: true,
-            gravity: 0.6,
-            yVel: 0,
-            rotation: 0
+            speed: 5,
+            acceleration: 0.8,
+            friction: 0.85,
+            viewDistance: 800
+        };
+        
+        this.camera = {
+            rotation: 0,
+            pitch: 0,
+            fov: 60
         };
         
         this.keys = {};
         this.mouse = { x: 0, y: 0, aiming: false };
         this.bots = [];
         this.bullets = [];
-        this.particles = [];
         this.grenades = [];
+        this.particles = [];
         
         this.running = true;
         this.kills = 0;
+        this.lastShotTime = 0;
+        
+        this.mapWidth = 1200;
+        this.mapHeight = 900;
+        
         this.spawnBots();
         this.setupControls();
         this.gameLoop();
@@ -182,20 +230,31 @@ class FPSGame {
     
     spawnBots() {
         for (let i = 0; i < this.config.botCount; i++) {
+            let x, y, validSpawn = false;
+            
+            while (!validSpawn) {
+                x = Math.random() * this.mapWidth;
+                y = Math.random() * this.mapHeight;
+                const dist = Math.hypot(x - this.player.x, y - this.player.y);
+                if (dist > 300) validSpawn = true;
+            }
+            
             const bot = {
-                x: Math.random() * (this.canvas.width - 200) + 100,
-                y: this.canvas.height / 2,
+                x: x,
+                y: y,
                 vx: 0,
                 vy: 0,
                 health: this.config.botHealth,
                 maxHealth: this.config.botHealth,
                 damage: this.config.botDamage,
                 speed: this.config.botSpeed,
-                size: 20,
+                radius: 25,
                 isBoss: this.config.isBoss,
-                shootCooldown: 1500,
+                shootCooldown: this.config.isBoss ? 800 : 1500,
                 lastShoot: 0,
-                angle: Math.random() * Math.PI * 2
+                moveTimer: 0,
+                moveDirection: Math.random() * Math.PI * 2,
+                stoppingDistance: this.config.isBoss ? 150 : 200
             };
             this.bots.push(bot);
         }
@@ -222,10 +281,14 @@ class FPSGame {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
             
-            // Calculate rotation towards mouse
-            const dx = this.mouse.x - this.canvas.width / 2;
-            const dy = this.mouse.y - this.canvas.height / 2;
-            this.player.rotation = Math.atan2(dy, dx);
+            // Smooth camera rotation
+            const centerX = this.canvas.width / 2;
+            const centerY = this.canvas.height / 2;
+            const dx = e.clientX - centerX;
+            const dy = e.clientY - centerY;
+            
+            this.camera.rotation = Math.atan2(dx, 300);
+            this.camera.pitch = Math.atan2(dy, 300) * 0.3;
         });
         
         document.addEventListener('mousedown', (e) => {
@@ -244,47 +307,100 @@ class FPSGame {
         if (WEAPONS[weapon].owned) {
             gameState.selectedWeapon = weapon;
             gameState.ammo = gameState.maxAmmo = WEAPONS[weapon].maxAmmo;
-            document.getElementById('weaponName').textContent = weapon.charAt(0).toUpperCase() + weapon.slice(1);
-            document.getElementById('maxAmmoDisplay').textContent = WEAPONS[weapon].maxAmmo;
+            document.getElementById('hudWeapon').textContent = WEAPONS[weapon].name;
+            document.getElementById('hudMaxAmmo').textContent = WEAPONS[weapon].maxAmmo;
+            updateHUD();
         }
     }
     
     shoot() {
         if (gameState.ammo <= 0) return;
         
+        const now = Date.now();
         const weapon = gameState.selectedWeapon;
+        const fireRate = WEAPONS[weapon].fireRate;
+        
+        if (now - this.lastShotTime < fireRate) return;
+        this.lastShotTime = now;
+        
         const damage = WEAPONS[weapon].damage;
         
-        // Create bullet
-        const bullet = {
-            x: this.canvas.width / 2 + Math.cos(this.player.rotation) * 50,
-            y: this.canvas.height / 2 + Math.sin(this.player.rotation) * 50,
-            vx: Math.cos(this.player.rotation) * 12,
-            vy: Math.sin(this.player.rotation) * 12,
-            damage: damage,
-            life: 300
-        };
+        // Raycast from camera
+        const rotation = this.camera.rotation;
         
-        this.bullets.push(bullet);
+        for (let i = 0; i < this.bots.length; i++) {
+            const bot = this.bots[i];
+            const dx = bot.x - this.player.x;
+            const dy = bot.y - this.player.y;
+            const dist = Math.hypot(dx, dy);
+            
+            if (dist > this.player.viewDistance) continue;
+            
+            const angle = Math.atan2(dy, dx);
+            const angleDiff = Math.abs(angle - rotation);
+            
+            // Hitbox based on distance (closer = larger hitbox)
+            const hitRadius = Math.max(15, 100 / (dist / 100));
+            
+            if (angleDiff < Math.atan2(hitRadius, dist)) {
+                bot.health -= damage;
+                
+                // Create hit particle
+                this.particles.push({
+                    x: bot.x,
+                    y: bot.y,
+                    vx: Math.cos(angle) * 3,
+                    vy: Math.sin(angle) * 3,
+                    life: 200,
+                    color: '#ff4444'
+                });
+                
+                if (bot.health <= 0) {
+                    this.kills++;
+                    gameState.kills = this.kills;
+                    gameState.money += 100;
+                    this.bots.splice(i, 1);
+                    
+                    // Explosion effect
+                    for (let j = 0; j < 10; j++) {
+                        const angle = (Math.PI * 2 * j) / 10;
+                        this.particles.push({
+                            x: bot.x,
+                            y: bot.y,
+                            vx: Math.cos(angle) * 4,
+                            vy: Math.sin(angle) * 4,
+                            life: 300,
+                            color: '#ffaa00'
+                        });
+                    }
+                }
+                break;
+            }
+        }
+        
         gameState.ammo--;
-        document.getElementById('ammoDisplay').textContent = gameState.ammo;
+        updateHUD();
     }
     
     reload() {
         gameState.ammo = gameState.maxAmmo;
-        document.getElementById('ammoDisplay').textContent = gameState.ammo;
+        updateHUD();
     }
     
     throwGrenade() {
         if (ABILITIES.grenade.quantity <= 0) return;
         
+        const rotation = this.camera.rotation;
+        const speed = 8;
+        
         const grenade = {
-            x: this.canvas.width / 2 + Math.cos(this.player.rotation) * 50,
-            y: this.canvas.height / 2 + Math.sin(this.player.rotation) * 50,
-            vx: Math.cos(this.player.rotation) * 8,
-            vy: Math.sin(this.player.rotation) * 8 - 5,
+            x: this.player.x + Math.cos(rotation) * 30,
+            y: this.player.y + Math.sin(rotation) * 30,
+            vx: Math.cos(rotation) * speed,
+            vy: Math.sin(rotation) * speed,
             life: 3000,
-            damage: ABILITIES.grenade.damage
+            damage: ABILITIES.grenade.damage,
+            radius: 12
         };
         
         this.grenades.push(grenade);
@@ -294,62 +410,51 @@ class FPSGame {
     update() {
         if (!this.running) return;
         
-        // Player movement
-        let moveX = 0;
-        let moveY = 0;
+        // Player movement with momentum
+        let accelX = 0, accelY = 0;
         
-        if (this.keys['w']) moveY -= this.player.speed;
-        if (this.keys['s']) moveY += this.player.speed;
-        if (this.keys['a']) moveX -= this.player.speed;
-        if (this.keys['d']) moveX += this.player.speed;
+        if (this.keys['w']) accelY -= this.player.acceleration;
+        if (this.keys['s']) accelY += this.player.acceleration;
+        if (this.keys['a']) accelX -= this.player.acceleration;
+        if (this.keys['d']) accelX += this.player.acceleration;
         
-        this.player.x += moveX;
-        this.player.y += moveY;
+        this.player.vx += accelX;
+        this.player.vy += accelY;
         
-        // Boundary checking
-        this.player.x = Math.max(50, Math.min(this.canvas.width - 50, this.player.x));
-        this.player.y = Math.max(50, Math.min(this.canvas.height - 50, this.player.y));
+        // Apply friction
+        this.player.vx *= this.player.friction;
+        this.player.vy *= this.player.friction;
         
-        // Update bullets
-        this.bullets = this.bullets.filter(bullet => {
-            bullet.x += bullet.vx;
-            bullet.y += bullet.vy;
-            bullet.life--;
-            
-            // Check collision with bots
-            for (let i = 0; i < this.bots.length; i++) {
-                const bot = this.bots[i];
-                const dist = Math.hypot(bullet.x - bot.x, bullet.y - bot.y);
-                if (dist < bot.size) {
-                    bot.health -= bullet.damage;
-                    if (bot.health <= 0) {
-                        this.kills++;
-                        gameState.kills = this.kills;
-                        gameState.money += 100;
-                        this.bots.splice(i, 1);
-                    }
-                    return false;
-                }
-            }
-            
-            return bullet.life > 0 && bullet.x > 0 && bullet.x < this.canvas.width && 
-                   bullet.y > 0 && bullet.y < this.canvas.height;
-        });
+        // Limit speed
+        const speed = Math.hypot(this.player.vx, this.player.vy);
+        if (speed > this.player.speed) {
+            this.player.vx = (this.player.vx / speed) * this.player.speed;
+            this.player.vy = (this.player.vy / speed) * this.player.speed;
+        }
+        
+        this.player.x += this.player.vx;
+        this.player.y += this.player.vy;
+        
+        // Map boundaries
+        this.player.x = Math.max(40, Math.min(this.mapWidth - 40, this.player.x));
+        this.player.y = Math.max(40, Math.min(this.mapHeight - 40, this.player.y));
         
         // Update grenades
         this.grenades = this.grenades.filter(grenade => {
             grenade.x += grenade.vx;
             grenade.y += grenade.vy;
-            grenade.vy += 0.3; // Gravity
+            grenade.vy += 0.2;
             grenade.life--;
             
             if (grenade.life <= 0) {
                 // Explosion
+                const explosionRadius = 150;
+                
                 for (let i = this.bots.length - 1; i >= 0; i--) {
                     const bot = this.bots[i];
                     const dist = Math.hypot(grenade.x - bot.x, grenade.y - bot.y);
-                    if (dist < 150) {
-                        bot.health -= grenade.damage;
+                    if (dist < explosionRadius) {
+                        bot.health -= grenade.damage * (1 - dist / explosionRadius);
                         if (bot.health <= 0) {
                             this.kills++;
                             gameState.kills = this.kills;
@@ -359,10 +464,22 @@ class FPSGame {
                     }
                 }
                 
-                // Player damage
                 const playerDist = Math.hypot(grenade.x - this.player.x, grenade.y - this.player.y);
-                if (playerDist < 150) {
-                    this.player.health -= grenade.damage / 2;
+                if (playerDist < explosionRadius) {
+                    this.player.health -= 30 * (1 - playerDist / explosionRadius);
+                }
+                
+                // Particles
+                for (let j = 0; j < 15; j++) {
+                    const angle = (Math.PI * 2 * j) / 15;
+                    this.particles.push({
+                        x: grenade.x,
+                        y: grenade.y,
+                        vx: Math.cos(angle) * 5,
+                        vy: Math.sin(angle) * 5,
+                        life: 400,
+                        color: '#ff6600'
+                    });
                 }
                 
                 return false;
@@ -371,126 +488,254 @@ class FPSGame {
             return true;
         });
         
-        // Update bots
+        // Update particles
+        this.particles = this.particles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            return p.life > 0;
+        });
+        
+        // Bot AI
         this.bots.forEach(bot => {
-            // Simple AI - move towards player
-            const dist = Math.hypot(this.player.x - bot.x, this.player.y - bot.y);
-            const angle = Math.atan2(this.player.y - bot.y, this.player.x - bot.x);
+            bot.moveTimer--;
             
-            if (dist > 100) {
-                bot.x += Math.cos(angle) * bot.speed;
-                bot.y += Math.sin(angle) * bot.speed;
+            if (bot.moveTimer <= 0) {
+                bot.moveDirection = Math.random() * Math.PI * 2;
+                bot.moveTimer = 60 + Math.random() * 120;
             }
             
+            const dist = Math.hypot(this.player.x - bot.x, this.player.y - bot.y);
+            
+            if (dist < 400) {
+                bot.moveDirection = Math.atan2(this.player.y - bot.y, this.player.x - bot.x);
+            }
+            
+            if (dist > bot.stoppingDistance) {
+                bot.vx += Math.cos(bot.moveDirection) * 0.3;
+                bot.vy += Math.sin(bot.moveDirection) * 0.3;
+            }
+            
+            const botSpeed = Math.hypot(bot.vx, bot.vy);
+            if (botSpeed > bot.speed) {
+                bot.vx = (bot.vx / botSpeed) * bot.speed;
+                bot.vy = (bot.vy / botSpeed) * bot.speed;
+            }
+            
+            bot.vx *= 0.9;
+            bot.vy *= 0.9;
+            
+            bot.x += bot.vx;
+            bot.y += bot.vy;
+            
+            // Boundaries
+            bot.x = Math.max(bot.radius, Math.min(this.mapWidth - bot.radius, bot.x));
+            bot.y = Math.max(bot.radius, Math.min(this.mapHeight - bot.radius, bot.y));
+            
             // Shoot at player
-            if (Date.now() - bot.lastShoot > bot.shootCooldown && dist < 600) {
-                const bullet = {
+            if (Date.now() - bot.lastShoot > bot.shootCooldown && dist < 500) {
+                const angle = Math.atan2(this.player.y - bot.y, this.player.x - bot.x);
+                const spread = (Math.random() - 0.5) * 0.3;
+                
+                this.bullets.push({
                     x: bot.x,
                     y: bot.y,
-                    vx: Math.cos(angle) * 8,
-                    vy: Math.sin(angle) * 8,
+                    vx: Math.cos(angle + spread) * 6,
+                    vy: Math.sin(angle + spread) * 6,
                     damage: bot.damage,
-                    life: 300
-                };
-                this.bullets.push(bullet);
+                    radius: 4
+                });
+                
                 bot.lastShoot = Date.now();
             }
         });
         
-        // Check player damage from bot bullets
+        // Check player hit by bullets
         this.bullets = this.bullets.filter(bullet => {
             const dist = Math.hypot(bullet.x - this.player.x, bullet.y - this.player.y);
-            if (dist < 20) {
+            if (dist < 25) {
                 this.player.health -= bullet.damage;
                 return false;
             }
-            return true;
+            
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+            
+            return bullet.x > 0 && bullet.x < this.mapWidth && 
+                   bullet.y > 0 && bullet.y < this.mapHeight;
         });
         
-        // Check if level complete
+        // Update HUD
+        gameState.health = Math.max(0, this.player.health);
+        updateHUD();
+        
+        // Check level complete
         if (this.bots.length === 0) {
             this.levelComplete();
         }
         
-        // Check if player dead
         if (this.player.health <= 0) {
             this.gameOver();
         }
-        
-        // Update HUD
-        document.getElementById('healthDisplay').textContent = Math.max(0, Math.floor(this.player.health));
-        document.getElementById('moneyDisplay').textContent = gameState.money;
-        document.querySelector('.healthBarFill').style.width = (Math.max(0, this.player.health) / this.player.maxHealth) * 100 + '%';
     }
     
     draw() {
-        // Clear canvas
-        this.ctx.fillStyle = '#0a0a0a';
+        // Draw 3D-like map view
+        const mapScale = Math.min(this.canvas.width, this.canvas.height) / 300;
+        
+        // Background
+        this.ctx.fillStyle = '#0a0a1a';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw grid background
-        this.ctx.strokeStyle = '#111';
+        // Grid
+        this.ctx.strokeStyle = '#1a1a2a';
         this.ctx.lineWidth = 1;
-        for (let i = 0; i < this.canvas.width; i += 50) {
+        for (let i = 0; i < this.mapWidth; i += 100) {
+            const screenX = ((i - this.player.x) * mapScale * Math.cos(this.camera.rotation) - 
+                           (0 - this.player.y) * mapScale * Math.sin(this.camera.rotation)) + this.canvas.width / 2;
             this.ctx.beginPath();
-            this.ctx.moveTo(i, 0);
-            this.ctx.lineTo(i, this.canvas.height);
-            this.ctx.stroke();
-        }
-        for (let i = 0; i < this.canvas.height; i += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, i);
-            this.ctx.lineTo(this.canvas.width, i);
+            this.ctx.moveTo(screenX, 0);
+            this.ctx.lineTo(screenX, this.canvas.height);
             this.ctx.stroke();
         }
         
-        // Draw bots
+        for (let i = 0; i < this.mapHeight; i += 100) {
+            const screenY = ((0 - this.player.x) * mapScale * Math.sin(this.camera.rotation) + 
+                           (i - this.player.y) * mapScale * Math.cos(this.camera.rotation)) + this.canvas.height / 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, screenY);
+            this.ctx.lineTo(this.canvas.width, screenY);
+            this.ctx.stroke();
+        }
+        
+        // Draw bots (with perspective)
         this.bots.forEach(bot => {
-            const dist = Math.hypot(this.player.x - bot.x, this.player.y - bot.y);
+            const relX = bot.x - this.player.x;
+            const relY = bot.y - this.player.y;
             
-            // Scale based on distance (perspective)
-            const scale = Math.max(0.3, Math.min(2, 500 / dist));
+            const rotX = relX * Math.cos(-this.camera.rotation) - relY * Math.sin(-this.camera.rotation);
+            const rotY = relX * Math.sin(-this.camera.rotation) + relY * Math.cos(-this.camera.rotation);
             
+            const dist = Math.hypot(rotX, rotY);
+            if (dist > this.player.viewDistance) return;
+            
+            const screenX = this.canvas.width / 2 + (rotX * mapScale);
+            const screenY = this.canvas.height / 2 + (rotY * mapScale);
+            
+            const scale = Math.max(0.5, Math.min(2, 500 / dist));
+            const size = bot.radius * scale;
+            
+            // Draw bot
             if (bot.isBoss) {
                 this.ctx.fillStyle = '#ff0000';
             } else {
                 this.ctx.fillStyle = '#ff6600';
             }
-            
             this.ctx.beginPath();
-            this.ctx.arc(bot.x, bot.y, bot.size * scale, 0, Math.PI * 2);
+            this.ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
             this.ctx.fill();
             
             // Health bar
             this.ctx.fillStyle = '#00ff00';
-            this.ctx.fillRect(bot.x - 20 * scale, bot.y - 35 * scale, 40 * scale * (bot.health / bot.maxHealth), 5 * scale);
+            const barWidth = size * 2;
+            const barHeight = 4 * scale;
+            const healthPercent = bot.health / bot.maxHealth;
+            this.ctx.fillRect(screenX - barWidth / 2, screenY - size - 15 * scale, barWidth * healthPercent, barHeight);
             this.ctx.strokeStyle = '#00ff00';
             this.ctx.lineWidth = 1;
-            this.ctx.strokeRect(bot.x - 20 * scale, bot.y - 35 * scale, 40 * scale, 5 * scale);
+            this.ctx.strokeRect(screenX - barWidth / 2, screenY - size - 15 * scale, barWidth, barHeight);
         });
         
         // Draw bullets
         this.ctx.fillStyle = '#00ff00';
         this.bullets.forEach(bullet => {
+            const relX = bullet.x - this.player.x;
+            const relY = bullet.y - this.player.y;
+            
+            const rotX = relX * Math.cos(-this.camera.rotation) - relY * Math.sin(-this.camera.rotation);
+            const rotY = relX * Math.sin(-this.camera.rotation) + relY * Math.cos(-this.camera.rotation);
+            
+            const screenX = this.canvas.width / 2 + (rotX * mapScale);
+            const screenY = this.canvas.height / 2 + (rotY * mapScale);
+            
             this.ctx.beginPath();
-            this.ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
+            this.ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
             this.ctx.fill();
         });
         
         // Draw grenades
         this.ctx.fillStyle = '#ffff00';
         this.grenades.forEach(grenade => {
+            const relX = grenade.x - this.player.x;
+            const relY = grenade.y - this.player.y;
+            
+            const rotX = relX * Math.cos(-this.camera.rotation) - relY * Math.sin(-this.camera.rotation);
+            const rotY = relX * Math.sin(-this.camera.rotation) + relY * Math.cos(-this.camera.rotation);
+            
+            const screenX = this.canvas.width / 2 + (rotX * mapScale);
+            const screenY = this.canvas.height / 2 + (rotY * mapScale);
+            
             this.ctx.beginPath();
-            this.ctx.arc(grenade.x, grenade.y, 8, 0, Math.PI * 2);
+            this.ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
             this.ctx.fill();
         });
         
-        // Draw weapon sight
-        this.ctx.strokeStyle = '#00ff00';
-        this.ctx.lineWidth = 2;
-        this.ctx.beginPath();
-        this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, 30, 0, Math.PI * 2);
-        this.ctx.stroke();
+        // Draw particles
+        this.particles.forEach(p => {
+            const relX = p.x - this.player.x;
+            const relY = p.y - this.player.y;
+            
+            const rotX = relX * Math.cos(-this.camera.rotation) - relY * Math.sin(-this.camera.rotation);
+            const rotY = relX * Math.sin(-this.camera.rotation) + relY * Math.cos(-this.camera.rotation);
+            
+            const screenX = this.canvas.width / 2 + (rotX * mapScale);
+            const screenY = this.canvas.height / 2 + (rotY * mapScale);
+            
+            this.ctx.fillStyle = p.color;
+            this.ctx.globalAlpha = p.life / 300;
+            this.ctx.beginPath();
+            this.ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.globalAlpha = 1;
+        });
+        
+        // Draw weapon model on separate canvas
+        this.drawWeaponModel();
+    }
+    
+    drawWeaponModel() {
+        const weaponCanvas = document.getElementById('weaponCanvas');
+        if (!weaponCanvas) return;
+        
+        const wCtx = weaponCanvas.getContext('2d');
+        wCtx.fillStyle = '#000';
+        wCtx.fillRect(0, 0, weaponCanvas.width, weaponCanvas.height);
+        
+        const weapon = gameState.selectedWeapon;
+        const color = WEAPONS[weapon].color;
+        
+        // Simple weapon model
+        wCtx.fillStyle = color;
+        wCtx.globalAlpha = 0.9;
+        
+        // Weapon body
+        wCtx.fillRect(150, 100, 100, 30);
+        
+        // Trigger guard
+        wCtx.fillRect(200, 130, 20, 30);
+        
+        // Scope/sight
+        wCtx.strokeStyle = color;
+        wCtx.lineWidth = 3;
+        wCtx.beginPath();
+        wCtx.arc(260, 80, 15, 0, Math.PI * 2);
+        wCtx.stroke();
+        
+        // Barrel
+        wCtx.fillStyle = color;
+        wCtx.fillRect(240, 108, 40, 14);
+        
+        wCtx.globalAlpha = 1;
     }
     
     gameLoop() {
@@ -506,10 +751,11 @@ class FPSGame {
         const reward = LEVELS[this.level].reward;
         gameState.money += reward;
         
-        document.getElementById('killsCount').textContent = this.kills;
-        document.getElementById('moneyEarned').textContent = reward;
-        document.getElementById('totalMoney').textContent = gameState.money;
+        document.getElementById('statKills').textContent = this.kills;
+        document.getElementById('statEarned').textContent = reward;
+        document.getElementById('statTotal').textContent = gameState.money;
         document.getElementById('gameOverTitle').textContent = 'LEVEL COMPLETE!';
+        document.getElementById('nextLevelBtn').style.display = 'block';
         
         gameOverModal.classList.add('active');
     }
@@ -517,21 +763,31 @@ class FPSGame {
     gameOver() {
         this.running = false;
         
-        document.getElementById('killsCount').textContent = this.kills;
-        document.getElementById('moneyEarned').textContent = '0';
-        document.getElementById('totalMoney').textContent = gameState.money;
-        document.getElementById('gameOverTitle').textContent = 'GAME OVER!';
+        document.getElementById('statKills').textContent = this.kills;
+        document.getElementById('statEarned').textContent = '0';
+        document.getElementById('statTotal').textContent = gameState.money;
+        document.getElementById('gameOverTitle').textContent = 'YOU DIED!';
         document.getElementById('nextLevelBtn').style.display = 'none';
         
         gameOverModal.classList.add('active');
     }
 }
 
+function updateHUD() {
+    document.getElementById('hudHealth').textContent = Math.max(0, Math.floor(gameState.health));
+    document.getElementById('hudMoney').textContent = gameState.money;
+    document.getElementById('hudCurrentAmmo').textContent = gameState.ammo;
+    
+    const healthPercent = Math.max(0, gameState.health) / 100;
+    document.getElementById('hudHealthBar').style.width = (healthPercent * 100) + '%';
+}
+
 function startGame() {
     document.getElementById('storeModal').classList.remove('active');
     document.getElementById('gameOverModal').classList.remove('active');
     updateStoreDisplay();
-    gameState.game = new FPSGame(gameState.level);
+    updateHUD();
+    gameState.game = new RivalsGame(gameState.level);
 }
 
 // Initialize
